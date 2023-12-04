@@ -17,6 +17,9 @@ class MySocket:
     def connect(self, host, port):
         # Connect to the specified host and port.
         self.sock.connect((host, port))
+        
+        print("To write message press : CTRL")
+        print("To leave the discussion press : ECHAP")
 
     def deconnect(self):
         # Close the socket connection.
