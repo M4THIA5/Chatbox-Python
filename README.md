@@ -10,6 +10,7 @@ pip install "python-socketio"
 pip install "python-socketio[client]"
 pip install "python-socketio[asyncio_client]"
 pip install uvicorn
+pip install readchar
 
 ./chatboxServer.py # dans ce terminal
 
