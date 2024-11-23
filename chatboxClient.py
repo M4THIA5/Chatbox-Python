@@ -5,6 +5,7 @@ import argparse
 
 sio = socketio.AsyncClient(reconnection=True, reconnection_attempts=5, reconnection_delay=1)
 RUN = True
+USERNAME = None
 
 @sio.event
 async def connect():
@@ -23,18 +24,25 @@ async def read_key():
     return key
 
 @sio.event
-async def show_chat(data):
-    print(data)
+async def show_chat(chat):
+    for message in chat:
+        if 'userName' in message and message['userName'] != USERNAME and message['clientId'] != sio.sid:
+            print(f"{message['userName']} -> {message['content']}")
+        else :
+            print(f"You -> {message['content']}")
 
 @sio.event
-async def message(data):
-    print(data)
+async def message(message):
+    if 'userName' in message and message['userName'] != USERNAME and message['clientId'] != sio.sid:
+        print(f"{message['userName']} -> {message['content']}")
 
 async def write_message():
     if not RUN:
         return
-    message = input('-> ')
-    await sio.emit('message', message)
+    data = {}
+    data['userName'] = USERNAME
+    data['content'] = input('You -> ')
+    await sio.emit('message', data)
 
 async def read_mode():
     while True:
@@ -62,7 +70,5 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Chatbox client")
     parser.add_argument('--username', type=str, required=True, help="Votre nom d'utilisateur")
     args = parser.parse_args()
-
-    #TODO: Add the username to the message
-    username = args.username
+    USERNAME = args.username
     asyncio.run(main())
