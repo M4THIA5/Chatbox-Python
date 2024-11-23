@@ -16,6 +16,6 @@ source env/bin/activate # For linux/mac
 
 python3 ./chatboxServer.py
 
-python3 ./chatboxClient.py # in an other shell
+python3 ./chatboxClient.py --username "YourName" # in an other shell
 
 deactivate # exit environment

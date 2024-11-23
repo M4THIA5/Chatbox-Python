@@ -13,8 +13,7 @@ async def connect(sid, environ):
 
 @sio.event
 async def show_chat(sid):
-    for message in chat:
-        await sio.emit('message', f"{message['clientId']} -> {message['content']}", to=sid)
+    await sio.emit('show_chat', chat, to=sid)
 
 @sio.event
 async def disconnect(sid):
@@ -23,11 +22,10 @@ async def disconnect(sid):
 
 @sio.event
 async def message(sid, data):
-    chat.append({'clientId': sid, 'content': data})
-    print(f"Message recieve by {sid} : {data}")
+    message = {'clientId': sid, 'userName': data['userName'], 'content': data['content']}
+    chat.append(message)
     for client in connected_clients:
-        if client != sid:
-            await sio.emit('message', f"{sid} -> {data}", to=client)
+        await sio.emit('message', message, to=client)
 
 if __name__ == '__main__':
     import uvicorn
