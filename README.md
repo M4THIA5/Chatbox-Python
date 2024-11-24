@@ -6,6 +6,7 @@ pip install "python-socketio[client]"
 pip install "python-socketio[asyncio_client]"
 pip install uvicorn
 pip install readchar
+pip install python-dotenv
 
 
 # Start programs
