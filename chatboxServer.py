@@ -16,7 +16,8 @@ async def connect(sid, environ):
 @sio.event
 async def emit_log(sid, log):
     if isinstance(log, dict) and 'reason' in log and 'userName' in log:
-        for client in connected_clients:
+        clients_copy = connected_clients.copy()
+        for client in clients_copy:
             if client != sid:
                 if log['reason'] == REASON.CONNECTION.value:
                     await sio.emit('log', f'{log["userName"]} connected', to=client)
