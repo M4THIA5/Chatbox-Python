@@ -1,5 +1,6 @@
 import socketio
 from enums import REASON
+from envVariables import SERVER_PORT, SERVER_HOST
 
 sio = socketio.AsyncServer(async_mode='asgi')
 app = socketio.ASGIApp(sio)
@@ -42,4 +43,4 @@ async def message(sid, data):
 
 if __name__ == '__main__':
     import uvicorn
-    uvicorn.run(app, host='0.0.0.0', port=4000)
+    uvicorn.run(app, host=SERVER_HOST, port=int(SERVER_PORT))
