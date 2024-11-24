@@ -7,10 +7,10 @@ pip install "python-socketio[asyncio_client]"
 pip install uvicorn
 pip install readchar
 pip install python-dotenv
+```
 
-
-# Start programs
-
+## Start programs
+```sh
 source env/bin/activate # For linux/mac
 
 .\env\Scripts\activate # For Windows

@@ -3,7 +3,7 @@ import socketio
 from readchar import readkey as rk
 import argparse
 from enums import REASON
-from envVariables import SERVER_PORT, SERVER_URL
+from envVariables import get_local_ip, override_env_variable, get_url
 
 sio = socketio.AsyncClient(reconnection=True, reconnection_attempts=5, reconnection_delay=1)
 USERNAME = None
@@ -20,6 +20,21 @@ async def disconnect():
 @sio.event
 async def log(message):
     print(message)
+
+async def connection_url():
+    try:
+        await sio.connect(get_url())
+        return
+    except Exception as e:
+        pass
+    try:
+        local_ip = get_local_ip()
+        override_env_variable('SERVER_IP', local_ip)
+        await sio.connect(get_url())
+        return
+    except Exception as e:
+        print('Connection failed: ', e)
+        return
 
 async def read_key():
     key = await asyncio.to_thread(rk)
@@ -57,11 +72,15 @@ async def read_mode():
         elif key == ' ':
             break
 
+def parse_args():
+    parser = argparse.ArgumentParser(description="Chatbox client")
+    parser.add_argument('--username', type=str, required=True, help="Votre nom d'utilisateur")
+    args = parser.parse_args()
+    return args
+
 async def main():
-    try:
-        await sio.connect(f'{SERVER_URL}:{SERVER_PORT}')
-    except Exception as e:
-        print('Connection failed: ', e)
+    await connection_url()
+    if not sio.connected:
         return
     print('Welcome to the chatbox. Press SPACE to switch to write mode, press Q to quit.')
     print('-----------------------------------------------------------------------\n')
@@ -74,8 +93,6 @@ async def main():
         await sio.sleep(0.1)
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="Chatbox client")
-    parser.add_argument('--username', type=str, required=True, help="Votre nom d'utilisateur")
-    args = parser.parse_args()
+    args = parse_args()
     USERNAME = args.username
     asyncio.run(main())
