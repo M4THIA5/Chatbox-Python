@@ -2,6 +2,7 @@ import asyncio
 import socketio
 from readchar import readkey as rk
 import argparse
+from enums import REASON
 
 sio = socketio.AsyncClient(reconnection=True, reconnection_attempts=5, reconnection_delay=1)
 RUN = True
@@ -10,14 +11,15 @@ USERNAME = None
 @sio.event
 async def connect():
     print('connection established')
+    await sio.emit('emit_log', {'userName': USERNAME, 'reason': REASON.CONNECTION.value})
 
 @sio.event
 async def disconnect():
     print('disconnected from server')
 
 @sio.event
-async def connect_error():
-    print('connection failed')
+async def log(message):
+    print(message)
 
 async def read_key():
     key = await asyncio.to_thread(rk)
@@ -28,7 +30,7 @@ async def show_chat(chat):
     for message in chat:
         if 'userName' in message and message['userName'] != USERNAME and message['clientId'] != sio.sid:
             print(f"{message['userName']} -> {message['content']}")
-        else :
+        else:
             print(f"You -> {message['content']}")
 
 @sio.event
@@ -55,7 +57,7 @@ async def read_mode():
             break
 
 async def main():
-    await sio.connect('http://localhost:4000', transports=['websocket'])
+    await sio.connect('http://localhost:4000')
     print('Welcome to the chatbox. Press SPACE to switch to write mode, press Q to quit.')
     print('-----------------------------------------------------------------------\n')
     await sio.emit('show_chat')
@@ -63,7 +65,7 @@ async def main():
         await read_mode()
         await write_message()
         await sio.sleep(0.1)
-
+    await sio.emit('emit_log', {'userName': USERNAME, 'reason': REASON.DISCONNECTION.value})
     await sio.disconnect()
 
 if __name__ == '__main__':
